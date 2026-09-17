@@ -1,0 +1,27 @@
+Desktop Store for Windows
+=========================
+
+This is shop software for one computer. It does not need the internet.
+There is no demo shop, no demo password and no demo products.
+
+Install
+-------
+1. Unzip DesktopStore-Windows.zip onto the store PC
+   (Desktop or C:\DesktopStore).
+2. Open the folder and double-click "Start Desktop Store".
+3. Windows may say “Windows protected your PC”. Click More info, then Run anyway.
+4. Register the store:
+   - store name
+   - your full name
+   - a username you choose
+   - a password you choose (at least 8 characters)
+5. After that, sign in with those details every time.
+
+Then add products (selling price and buying cost) and sell from the till.
+
+Where data is saved
+-------------------
+C:\Users\<their-name>\AppData\Roaming\DesktopStore\store.db
+Product photos are in the images folder next to that file.
+
+Keep that folder if you move the program. It is the shop book.
