@@ -17,6 +17,17 @@ Install
    - a password you choose (at least 8 characters)
 5. After that, sign in with those details every time.
 
+This computer and phones
+------------------------
+The program opens on this computer (localhost).
+Home shows two addresses:
+
+  This computer:     http://127.0.0.1:8080
+  Phones on Wi‑Fi:   http://192.168.x.x:8080
+
+Phones must be on the same Wi‑Fi. Sign in with the same username and password.
+If a phone cannot open it, allow Desktop Store on private networks when Windows asks.
+
 Then add products (selling price and buying cost) and sell from the till.
 
 Where data is saved

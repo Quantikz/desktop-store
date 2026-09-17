@@ -4,8 +4,10 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.request import urlopen
 
 from desktop_store.db import Store
+from desktop_store.lan import LanServer, local_url
 from desktop_store.money import naira, parse_amount
 
 
@@ -93,6 +95,22 @@ class StoreTests(unittest.TestCase):
     def test_money(self) -> None:
         self.assertEqual(naira(123456), "₦1,234.56")
         self.assertEqual(parse_amount("1,234.56"), 123456)
+
+    def test_lan_opens_on_this_computer(self) -> None:
+        self.store.register(
+            shop_name="Mart",
+            owner_name="Owner",
+            username="owner",
+            password="realpass1",
+        )
+        server = LanServer(self.store.path, port=18787)
+        server.start()
+        try:
+            page = urlopen(local_url(server.port) + "/", timeout=3).read().decode()
+            self.assertIn("Sign in", page)
+            self.assertIn("Mart", page)
+        finally:
+            server.stop()
 
 
 if __name__ == "__main__":

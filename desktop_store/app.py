@@ -33,6 +33,7 @@ from PySide6.QtWidgets import (
 
 from desktop_store import APP_NAME
 from desktop_store.db import CATEGORIES, PAY_METHODS, UNITS, Store
+from desktop_store.lan import LanServer, lan_urls, local_url
 from desktop_store.money import naira, parse_amount
 from desktop_store.paths import app_data_dir, images_dir
 from desktop_store.theme import QSS
@@ -289,6 +290,12 @@ class MainWindow(QMainWindow):
         self.store = store
         self.user = user
         self.cart: list[dict] = []
+        self.lan: LanServer | None = None
+        try:
+            self.lan = LanServer(store.path)
+            self.lan.start()
+        except OSError:
+            self.lan = None
         shop = store.shop()
         self.setWindowTitle(f"{shop['name']} — {APP_NAME}")
         self.resize(1280, 800)
@@ -354,6 +361,12 @@ class MainWindow(QMainWindow):
         self.close()
         start(self.store)
 
+    def closeEvent(self, event) -> None:  # noqa: N802
+        if self.lan:
+            self.lan.stop()
+            self.lan = None
+        super().closeEvent(event)
+
     def _wrap(self, widget: QWidget) -> QWidget:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -378,7 +391,17 @@ class MainWindow(QMainWindow):
         stats = self.store.performance()
         layout.addWidget(_muted(shop["city"] or "This computer"))
         layout.addWidget(_title(shop["name"]))
-        layout.addWidget(_muted("This store starts empty. Add products, then sell from the till."))
+        layout.addWidget(_muted("This computer is the shop. Phones on the same Wi‑Fi open the address below, then sign in with the account you created."))
+        port = self.lan.port if self.lan else 8080
+        layout.addWidget(_stat("This computer", local_url(port), "Opens on this PC"))
+        phones = lan_urls(port)
+        layout.addWidget(
+            _stat(
+                "Phones on this Wi‑Fi",
+                phones[0] if phones else "Connect Wi‑Fi",
+                "Allow Desktop Store on private networks if Windows asks",
+            )
+        )
         grid = QGridLayout()
         grid.addWidget(_stat("Today", naira(stats["today_sales"]), f"{stats['today_count']} sales"), 0, 0)
         grid.addWidget(_stat("Gross profit", naira(stats["profit"]), "Sales minus buying cost"), 0, 1)

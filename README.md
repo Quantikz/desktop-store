@@ -4,6 +4,8 @@ Offline shop software for one Windows computer. Python + SQLite. No internet. No
 
 On first open the store is empty. You register the shop name and your own username and password. Only then is anything written to the database on this PC.
 
+The program also opens on this computer as a local shop address. Phones on the same Wi‑Fi open that address and sign in with the same account.
+
 ## What it does
 
 - Register the store on first use (no default user, no default password)
@@ -28,7 +30,10 @@ Download **DesktopStore-Windows.zip** from Releases.
 1. Unzip the folder onto the store PC.
 2. Double-click **Start Desktop Store**.
 3. Register the store. Choose your own name and password.
-4. Add products, then sell.
+4. Home shows **This computer** and **Phones on this Wi‑Fi**.
+5. Add products, then sell.
+
+Phones on the same Wi‑Fi open the Wi‑Fi address, then sign in with the same account. Allow Desktop Store on private networks if Windows asks.
 
 The shop book is saved at:
 
