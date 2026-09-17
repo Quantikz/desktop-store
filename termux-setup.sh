@@ -18,32 +18,16 @@ elif command -v python >/dev/null 2>&1; then
   python_bin="$(command -v python)"
 fi
 
-fetch_bin=""
-if command -v curl >/dev/null 2>&1; then
-  fetch_bin="curl"
-elif command -v wget >/dev/null 2>&1; then
-  fetch_bin="wget"
-fi
-
-need_pkg=0
-[ -z "${python_bin}" ] && need_pkg=1
-[ -z "${fetch_bin}" ] && need_pkg=1
-
-if [ "${need_pkg}" -eq 1 ]; then
+if [ -z "${python_bin}" ]; then
   echo "Termux needs Python. Trying to install it..."
-  if ! pkg install -y python curl; then
+  if ! pkg install -y python; then
     echo
-    echo "Termux could not reach its package site (network unreachable)."
-    echo "Fix the Termux mirror, then run this again:"
-    echo
-    echo "  termux-change-repo"
-    echo
-    echo "Choose a mirror group (try Europe or Default), tap the first list,"
-    echo "then paste the install line again."
+    echo "Termux could not reach its package site."
+    echo "Run:  termux-change-repo"
+    echo "Then paste the install line again."
     exit 1
   fi
   python_bin="$(command -v python3 || command -v python)"
-  fetch_bin="curl"
 fi
 
 HOME_DIR="${HOME}"
@@ -52,21 +36,24 @@ ZIP_PATH="${HOME_DIR}/DesktopStore-Phone.zip"
 ZIP_URL="https://github.com/Quantikz/desktop-store/releases/latest/download/DesktopStore-Phone.zip"
 
 echo
-echo "Downloading the shop..."
-if [ "${fetch_bin}" = "curl" ]; then
-  curl -fL --retry 3 -o "${ZIP_PATH}" "${ZIP_URL}"
-else
-  wget -O "${ZIP_PATH}" "${ZIP_URL}"
-fi
+echo "Downloading the shop with Python..."
+"${python_bin}" - << PY
+import urllib.request
+from pathlib import Path
+url = "${ZIP_URL}"
+dest = Path.home() / "DesktopStore-Phone.zip"
+print("from GitHub…")
+urllib.request.urlretrieve(url, dest)
+print("saved", dest)
+PY
 
 rm -rf "${APP_DIR}"
 "${python_bin}" - << PY
 import zipfile
 from pathlib import Path
 zip_path = Path.home() / "DesktopStore-Phone.zip"
-dest = Path.home()
 with zipfile.ZipFile(zip_path) as zf:
-    zf.extractall(dest)
+    zf.extractall(Path.home())
 print("unpacked")
 PY
 rm -f "${ZIP_PATH}"
