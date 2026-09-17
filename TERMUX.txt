@@ -1,35 +1,20 @@
 Desktop Store on Termux (this phone is the shop)
 ================================================
 
-This phone hosts the shop. Other phones on the same Wi-Fi open it.
-No demo data. You register on first use.
-Python is enough. Do not install PySide or Node.
+Paste this one line in Termux. It installs Python, downloads the shop, and starts it.
 
-1. In Termux:
+curl -fsSL https://raw.githubusercontent.com/Quantikz/desktop-store/main/termux-setup.sh | bash
 
-   pkg update
-   pkg install python unzip wget
+Leave Termux open.
 
-2. Download the phone zip, then:
+On THIS phone, open the browser:
 
-   cd ~
-   unzip DesktopStore-Phone.zip
-   cd DesktopStore-Phone
-   python run_phone.py
+  http://127.0.0.1:8080
 
-3. Leave Termux open.
+Register the store (your name, username, password).
 
-4. On THIS phone, open the browser:
+Other phones on the same Wi-Fi open the Wi-Fi address printed in Termux.
 
-   http://127.0.0.1:8080
+Next time, in Termux type:
 
-5. Register the store (your name, username, password).
-
-6. Other phones on the same Wi-Fi open the Wi-Fi address printed in Termux
-   (and shown on Home), then sign in with the same account.
-
-The shop book is saved in:
-
-  /data/data/com.termux/files/home/DesktopStore/store.db
-
-Keep Termux open while the shop is in use.
+  desktop-store
