@@ -1,7 +1,7 @@
 Desktop Store on Termux (this phone is the shop)
 ================================================
 
-Paste this one line in Termux. It installs Python, downloads the shop, and starts it.
+Paste this one line in Termux. It downloads the shop and starts it.
 
 curl -fsSL https://raw.githubusercontent.com/Quantikz/desktop-store/main/termux-setup.sh | bash
 
@@ -18,3 +18,10 @@ Other phones on the same Wi-Fi open the Wi-Fi address printed in Termux.
 Next time, in Termux type:
 
   desktop-store
+
+If Termux says “network is unreachable” or “failed to fetch packages-cf.termux.dev”:
+
+  termux-change-repo
+
+Pick a mirror group (try Default or Europe), then paste the install line again.
+That is Termux not reaching its Python download site — not the shop itself.
