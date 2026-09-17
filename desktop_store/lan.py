@@ -148,6 +148,9 @@ class Handler(BaseHTTPRequestHandler):
             self.redirect("/", "ds_user=; Max-Age=0; Path=/")
             return
         user = self.user()
+        if not self.store().registered():
+            self.send_html(phone_html.register())
+            return
         if not user:
             self.send_html(phone_html.login(shop))
             return
@@ -178,6 +181,23 @@ class Handler(BaseHTTPRequestHandler):
         form = self.read_form()
         store = self.store()
         shop = self.shop_name()
+        if path == "/register":
+            if form.get("password") != form.get("confirm"):
+                self.send_html(phone_html.register("Passwords do not match."))
+                return
+            try:
+                user = store.register(
+                    shop_name=form.get("shop_name") or "",
+                    owner_name=form.get("owner_name") or "",
+                    username=form.get("username") or "",
+                    password=form.get("password") or "",
+                    city=form.get("city") or "",
+                )
+            except ValueError as exc:
+                self.send_html(phone_html.register(str(exc)))
+                return
+            self.redirect("/", f"ds_user={user['id']}; Path=/; SameSite=Lax")
+            return
         if path == "/login":
             try:
                 user = store.login(form.get("username", ""), form.get("password", ""))
@@ -302,3 +322,47 @@ class LanServer:
         if self.httpd:
             self.httpd.shutdown()
             self.httpd.server_close()
+
+
+def main() -> None:
+    from desktop_store.paths import app_data_dir
+
+    db = db_path()
+    db.parent.mkdir(parents=True, exist_ok=True)
+    last_error: OSError | None = None
+    httpd = None
+    port = PORT
+    for candidate in (PORT, 8787, 9090):
+        try:
+            Handler.state = LanState(db, candidate)
+            httpd = ThreadingHTTPServer((HOST, candidate), Handler)
+            httpd.allow_reuse_address = True
+            port = candidate
+            Handler.state.port = candidate
+            break
+        except OSError as exc:
+            last_error = exc
+    if httpd is None:
+        raise last_error or OSError("Could not open the shop on this phone.")
+    print()
+    print("  Desktop Store is open on this phone.")
+    print(f"  This phone:     {local_url(port)}")
+    urls = lan_urls(port)
+    if urls:
+        print("  Other phones on this Wi-Fi:")
+        for url in urls:
+            print(f"    {url}")
+    else:
+        print("  Connect Wi-Fi to share with other phones.")
+    print(f"  Database: {app_data_dir()}")
+    print("  Leave Termux open. Press Ctrl+C to stop.")
+    print()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopped.")
+        httpd.shutdown()
+
+
+if __name__ == "__main__":
+    main()

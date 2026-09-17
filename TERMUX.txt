@@ -1,0 +1,35 @@
+Desktop Store on Termux (this phone is the shop)
+================================================
+
+This phone hosts the shop. Other phones on the same Wi-Fi open it.
+No demo data. You register on first use.
+Python is enough. Do not install PySide or Node.
+
+1. In Termux:
+
+   pkg update
+   pkg install python unzip wget
+
+2. Download the phone zip, then:
+
+   cd ~
+   unzip DesktopStore-Phone.zip
+   cd DesktopStore-Phone
+   python run_phone.py
+
+3. Leave Termux open.
+
+4. On THIS phone, open the browser:
+
+   http://127.0.0.1:8080
+
+5. Register the store (your name, username, password).
+
+6. Other phones on the same Wi-Fi open the Wi-Fi address printed in Termux
+   (and shown on Home), then sign in with the same account.
+
+The shop book is saved in:
+
+  /data/data/com.termux/files/home/DesktopStore/store.db
+
+Keep Termux open while the shop is in use.

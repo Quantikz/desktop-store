@@ -71,6 +71,27 @@ def shell(shop: str, title: str, body: str, active: str, extra_head: str = "") -
     return doc.encode("utf-8")
 
 
+def register(error: str = "") -> bytes:
+    err = f'<p class="error">{html.escape(error)}</p>' if error else ""
+    body = f"""
+    <div class="card">
+      <p class="muted">First use on this phone</p>
+      <h1>Register this store</h1>
+      <p class="muted">Nothing is saved until you create the store. Choose your own username and password. There is no demo account.</p>
+      {err}
+      <form method="post" action="/register">
+        <label>Store name</label><input name="shop_name" required>
+        <label>City</label><input name="city">
+        <label>Your full name</label><input name="owner_name" required>
+        <label>Username</label><input name="username" autocomplete="username" required>
+        <label>Password</label><input name="password" type="password" autocomplete="new-password" required>
+        <label>Confirm password</label><input name="confirm" type="password" required>
+        <p><button type="submit">Create store</button></p>
+      </form>
+    </div>"""
+    return shell("Desktop Store", "Register", body, "login")
+
+
 def login(shop: str, error: str = "") -> bytes:
     err = f'<p class="error">{html.escape(error)}</p>' if error else ""
     body = f"""
@@ -93,8 +114,8 @@ def home(shop: str, user: str, local: str, phones: list[str], stats: dict) -> by
     body = f"""
     <p class="muted">{html.escape(user)}</p>
     <h1>{html.escape(shop)}</h1>
-    <p class="muted">This shop is open on this computer. Phones on the same Wi‑Fi open the Wi‑Fi address, then sign in.</p>
-    <div class="card"><p class="muted">This computer / this phone</p><p class="stat">{html.escape(local)}</p></div>
+    <p class="muted">This shop is open on this phone. Other phones on the same Wi‑Fi open the Wi‑Fi address, then sign in.</p>
+    <div class="card"><p class="muted">This phone</p><p class="stat">{html.escape(local)}</p></div>
     <div class="card"><p class="muted">Share on this Wi‑Fi</p>{phone_block}
       <p class="muted">If a phone cannot open it, allow the program on private networks when Windows asks.</p>
     </div>

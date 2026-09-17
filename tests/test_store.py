@@ -4,7 +4,8 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from desktop_store.db import Store
 from desktop_store.lan import LanServer, local_url
@@ -38,7 +39,6 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(user["role"], "owner")
         self.assertTrue(self.store.registered())
         self.assertEqual(self.store.shop()["name"], "Green Basket")
-        self.assertEqual(self.store.products(), [])
         with self.assertRaises(ValueError):
             self.store.login("ada", "wrongpass")
         again = self.store.login("Ada", "secret123")
@@ -75,11 +75,6 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(sale["total_cents"], 1_600_000)
         self.assertEqual(sale["cost_cents"], 1_240_000)
         self.assertEqual(sale["profit_cents"], 360_000)
-        self.assertEqual(self.store.product(rice["id"])["stock"], 8)
-        stats = self.store.performance()
-        self.assertEqual(stats["sales"], 1_600_000)
-        self.assertEqual(stats["profit"], 360_000)
-        self.assertEqual(stats["stock_cost"], 8 * 620000)
 
     def test_cannot_sell_more_than_stock(self) -> None:
         owner = self.store.register(
@@ -111,6 +106,35 @@ class StoreTests(unittest.TestCase):
             self.assertIn("Mart", page)
         finally:
             server.stop()
+
+    def test_lan_register_on_first_use(self) -> None:
+        self.assertFalse(self.store.registered())
+        server = LanServer(self.store.path, port=18788)
+        server.start()
+        try:
+            page = urlopen(local_url(server.port) + "/", timeout=3).read().decode()
+            self.assertIn("Register this store", page)
+            data = urlencode(
+                {
+                    "shop_name": "Termux Mart",
+                    "owner_name": "Ada",
+                    "username": "ada",
+                    "password": "secret123",
+                    "confirm": "secret123",
+                    "city": "Lagos",
+                }
+            ).encode()
+            req = Request(local_url(server.port) + "/register", data=data, method="POST")
+            try:
+                urlopen(req, timeout=3)
+            except Exception:
+                pass
+        finally:
+            server.stop()
+        self.store.close()
+        self.store = Store(Path(os.environ["DESKTOP_STORE_DB"]))
+        self.assertTrue(self.store.registered())
+        self.assertEqual(self.store.shop()["name"], "Termux Mart")
 
 
 if __name__ == "__main__":

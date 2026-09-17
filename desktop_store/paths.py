@@ -6,6 +6,12 @@ from pathlib import Path
 
 
 def app_data_dir() -> Path:
+    override = os.environ.get("DESKTOP_STORE_HOME")
+    if override:
+        return Path(override)
+    prefix = os.environ.get("PREFIX", "")
+    if os.environ.get("TERMUX_VERSION") or "com.termux" in prefix:
+        return Path.home() / "DesktopStore"
     if sys.platform == "win32":
         root = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
         return Path(root) / "DesktopStore"
